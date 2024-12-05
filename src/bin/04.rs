@@ -86,13 +86,13 @@ pub fn part_two(input: &str) -> Option<u32> {
     fn check_diagonal(
         candidate_m_set: &HashSet<(i32, i32)>,
         candidate_s_set: &HashSet<(i32, i32)>,
-        a_x: i32,
-        a_y: i32,
+        x: i32,
+        y: i32,
         dx: i32,
         dy: i32,
-    ) -> Option<bool> {
-        let (lx, ly) = (a_x + dx, a_y + dy);
-        let (rx, ry) = (a_x - dx, a_y - dy);
+    ) -> bool {
+        let (lx, ly) = (x + dx, y + dy);
+        let (rx, ry) = (x - dx, y - dy);
 
         let lu = if candidate_m_set.contains(&(lx, ly)) {
             Some('M')
@@ -111,21 +111,19 @@ pub fn part_two(input: &str) -> Option<u32> {
         };
 
         match (lu, rd) {
-            (Some('M'), Some('S')) | (Some('S'), Some('M')) => Some(true),
-            _ => None,
+            (Some('M'), Some('S')) | (Some('S'), Some('M')) => false,
+            _ => true,
         }
     }
 
     Some(
         candidate_a
             .iter()
-            .filter_map(|&(a_x, a_y)| {
-                let lu = check_diagonal(&candidate_m_set, &candidate_s_set, a_x, a_y, 1, 1);
-                let ld = check_diagonal(&candidate_m_set, &candidate_s_set, a_x, a_y, 1, -1);
-                let ru = check_diagonal(&candidate_m_set, &candidate_s_set, a_x, a_y, -1, 1);
-                let rd = check_diagonal(&candidate_m_set, &candidate_s_set, a_x, a_y, -1, -1);
+            .filter_map(|&(x, y)| {
+                let lu = check_diagonal(&candidate_m_set, &candidate_s_set, x, y, 1, 1);
+                let ld = check_diagonal(&candidate_m_set, &candidate_s_set, x, y, 1, -1);
 
-                if lu.is_none() || ld.is_none() || ru.is_none() || rd.is_none() {
+                if lu || ld {
                     None
                 } else {
                     Some(1)
