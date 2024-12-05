@@ -11,14 +11,13 @@ pub fn part_one(input: &str) -> Option<u32> {
             .unwrap()
             .lines()
             .fold(HashMap::<u32, Vec<u32>>::new(), |mut hm, line| {
-                let pages = line
+                if let Some(pages) = line
                     .split('|')
-                    .map(|p| p.parse::<u32>().unwrap())
-                    .collect::<Vec<_>>();
-
-                let value_ref: &mut Vec<u32> = hm.entry(pages[1]).or_insert(Vec::new());
-
-                value_ref.push(pages[0]);
+                    .map(|p| p.parse::<u32>().ok())
+                    .collect::<Option<Vec<_>>>()
+                {
+                    hm.entry(pages[1]).or_insert_with(Vec::new).push(pages[0]);
+                }
 
                 hm
             });
@@ -36,7 +35,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 
                 let mut res = Some(seq[seq.len() / 2]);
 
-                for (index, page) in seq.clone().into_iter().enumerate() {
+                for (index, page) in seq.iter().enumerate() {
                     let rest = &seq[(index + 1)..];
 
                     if let Some(forbidden) = greater_than.get(&page) {
@@ -58,26 +57,23 @@ pub fn part_two(input: &str) -> Option<u32> {
 
     let greater_than =
         parts
-            .next()
-            .unwrap()
+            .next()?
             .lines()
             .fold(HashMap::<u32, Vec<u32>>::new(), |mut hm, line| {
-                let pages = line
+                if let Some(pages) = line
                     .split('|')
-                    .map(|p| p.parse::<u32>().unwrap())
-                    .collect::<Vec<_>>();
-
-                let value_ref: &mut Vec<u32> = hm.entry(pages[1]).or_insert(Vec::new());
-
-                value_ref.push(pages[0]);
+                    .map(|p| p.parse::<u32>().ok())
+                    .collect::<Option<Vec<_>>>()
+                {
+                    hm.entry(pages[1]).or_insert_with(Vec::new).push(pages[0]);
+                }
 
                 hm
             });
 
     Some(
         parts
-            .next()
-            .unwrap()
+            .next()?
             .lines()
             .filter_map(|line| {
                 let seq = line
@@ -87,32 +83,29 @@ pub fn part_two(input: &str) -> Option<u32> {
 
                 let mut res = None;
 
-                let mut done = false;
-                let mut sorted = seq.clone();
+                for (index, page) in seq.iter().enumerate() {
+                    let rest = &seq[(index + 1)..];
 
-                let l = seq.len();
-                while !done {
-                    done = true;
-                    for (index, page) in sorted.clone().into_iter().enumerate() {
-                        let mut cont = true;
-                        let rest = &mut sorted.clone()[(index + 1)..];
-                        rest.reverse();
+                    if let Some(forbidden) = greater_than.get(&page) {
+                        if forbidden.into_iter().any(|f| rest.contains(f)) {
+                            let mut sorted = seq.clone();
 
-                        if let Some(forbidden) = greater_than.get(&page) {
-                            for (index_2, r) in rest.into_iter().enumerate() {
-                                if forbidden.contains(r) {
-                                    sorted.swap(index, l - index_2 - 1);
-                                    cont = false;
-                                    res = Some(sorted[sorted.len() / 2]);
-                                    break;
+                            sorted.sort_by(|a, b| {
+                                // If 'a' must be greater than 'b' according to the `greater_than` map, return a positive value
+                                if let Some(forbidden) = greater_than.get(a) {
+                                    if forbidden.contains(b) {
+                                        return std::cmp::Ordering::Greater;
+                                    }
                                 }
-                            }
-                        }
-                        if !cont {
-                            done = false;
+
+                                // Otherwise, sort order is already correct and leave it as is.
+                                std::cmp::Ordering::Less
+                            });
+
+                            res = Some(sorted[sorted.len() / 2]);
                             break;
                         }
-                    }
+                    };
                 }
 
                 res
