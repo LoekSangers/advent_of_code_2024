@@ -139,8 +139,8 @@ pub fn part_two(input: &str) -> Option<u32> {
                 let new_block = next_pos(pos, &dir);
                 match map.get(&new_block) {
                     Some(Tile::Open) => {
-                        let mut tmp_current_pos = pos;
-                        let mut tmp_current_direction = dir;
+                        let mut tmp_current_pos = start_position;
+                        let mut tmp_current_direction = Direction::North;
                         loop {
                             if !tmp_visited.insert((tmp_current_pos, tmp_current_direction)) {
                                 return Some(new_block);
