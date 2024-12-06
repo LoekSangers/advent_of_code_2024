@@ -120,10 +120,9 @@ pub fn part_two(input: &str) -> Option<u32> {
         candidate_a
             .iter()
             .filter_map(|&(x, y)| {
-                let lu = check_diagonal(&candidate_m_set, &candidate_s_set, x, y, 1, 1);
-                let ld = check_diagonal(&candidate_m_set, &candidate_s_set, x, y, 1, -1);
-
-                if lu || ld {
+                if check_diagonal(&candidate_m_set, &candidate_s_set, x, y, 1, 1)
+                    || check_diagonal(&candidate_m_set, &candidate_s_set, x, y, 1, -1)
+                {
                     None
                 } else {
                     Some(1)
