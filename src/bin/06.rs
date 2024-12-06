@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 advent_of_code::solution!(6);
 
@@ -108,13 +108,18 @@ pub fn part_two(input: &str) -> Option<u32> {
                 _ => (hm, start),
             },
         );
-    let mut visited = HashSet::new();
 
+    let mut visited = VecDeque::new();
     let mut current_pos = start_position;
     let mut current_direction = Direction::North;
-    loop {
-        visited.insert((current_pos, current_direction));
+    visited.push_back(start_position);
 
+    loop {
+        if let Some(&pos) = visited.get(visited.len() - 1) {
+            if pos != current_pos {
+                visited.push_back(current_pos);
+            }
+        }
         let next_pos = next_pos(current_pos, &current_direction);
 
         match map.get(&next_pos) {
@@ -133,14 +138,15 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(
         visited
             .iter()
-            .filter_map(|&(pos, dir)| {
-                let mut tmp_visited = HashSet::new();
-
-                let new_block = next_pos(pos, &dir);
+            .skip(1)
+            .filter_map(|&pos| {
+                let new_block = pos;
                 match map.get(&new_block) {
                     Some(Tile::Open) => {
+                        let mut tmp_visited = HashSet::new();
                         let mut tmp_current_pos = start_position;
                         let mut tmp_current_direction = Direction::North;
+
                         loop {
                             if !tmp_visited.insert((tmp_current_pos, tmp_current_direction)) {
                                 return Some(new_block);
@@ -149,7 +155,7 @@ pub fn part_two(input: &str) -> Option<u32> {
 
                             match map.get(&next_pos) {
                                 Some(Tile::Open) => {
-                                    if next_pos.0 == new_block.0 && next_pos.1 == new_block.1 {
+                                    if next_pos == new_block {
                                         tmp_current_direction =
                                             next_direction(&tmp_current_direction);
                                     } else {
@@ -168,8 +174,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                 }
             })
             .collect::<HashSet<_>>()
-            .into_iter()
-            .count() as u32,
+            .len() as u32,
     )
 }
 
