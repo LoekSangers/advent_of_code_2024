@@ -31,6 +31,20 @@ impl ClawMachine {
     }
 
     pub fn solve(&self) -> Option<u32> {
+        /*
+        A * a_x + B * b_x = prize_x
+        -> A = (prize_x - B * b_x)/a_x
+
+        A * a_y + B * b_y = prize_y
+
+        ((prize_x - B * b_x)/a_x )* a_y + B * b_y = prize_y
+        (prize_x - B * b_x) * a_y + B * b_y * a_x = prize_y * a_x
+        prize_x * a_y - B * b_x * a_y + B * b_y * a_x = prize_y * a_x
+        - B * b_x * a_y + B * b_y * a_x = prize_y * a_x - prize_x * a_y
+        B * (-b_x * a_y + b_y * a_x) = prize_y * a_x - prize_x * a_y
+        B  = (prize_y * a_x - prize_x * a_y) / (-b_x * a_y + b_y * a_x)
+
+                 */
         let b = (self.prize_y * self.a_x - self.prize_x * self.a_y)
             / (self.b_y * self.a_x - self.b_x * self.a_y);
         let a = (self.prize_x - b * self.b_x) / self.a_x;
